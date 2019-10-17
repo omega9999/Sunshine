@@ -140,4 +140,8 @@
     <!--Used by SunshinePreferences-->
     <!-- - - - - - - - - - - - - - -->
     <!--NONE-->
+
+    <string name="error_message">
+        An error has occurred. Please try again by clicking REFRESH
+    </string>
 </resources>
