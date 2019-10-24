@@ -12,10 +12,15 @@ import java.util.List;
 
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
     private List<String> mWeatherData;
+    private ForecastAdapterOnClickHandler mClickHandler;
 
-    public ForecastAdapter() {
+    interface ForecastAdapterOnClickHandler{
+        void onClick(final CharSequence weatherForDay);
     }
 
+    public ForecastAdapter(ForecastAdapterOnClickHandler clickHandler) {
+        this.mClickHandler = clickHandler;
+    }
     @NonNull
     @Override
     public ForecastAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,13 +46,22 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     }
 
 
-    class ForecastAdapterViewHolder extends RecyclerView.ViewHolder {
+    class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final TextView mWeatherTextView;
 
         ForecastAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             mWeatherTextView = itemView.findViewById(R.id.tv_weather_data);
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            String weatherForDay = mWeatherData.get(adapterPosition);
+            mClickHandler.onClick(weatherForDay);
+        }
+
     }
 
 

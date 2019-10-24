@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,7 +36,7 @@ import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 import java.net.URL;
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler {
 
     private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
@@ -43,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mErrorMessageDisplay;
 
     private ProgressBar mLoadingIndicator;
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setHasFixedSize(true);
 
-        mForecastAdapter = new ForecastAdapter();
+        mForecastAdapter = new ForecastAdapter(this);
 
         mRecyclerView.setAdapter(mForecastAdapter);
 
@@ -71,10 +73,20 @@ public class MainActivity extends AppCompatActivity {
          * Please note: This so called "ProgressBar" isn't a bar by default. It is more of a
          * circle. We didn't make the rules (or the names of Views), we just follow them.
          */
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+        mLoadingIndicator = findViewById(R.id.pb_loading_indicator);
 
         /* Once all of our views are setup, we can load the weather data. */
         loadWeatherData();
+    }
+
+
+    @Override
+    public void onClick(CharSequence weatherForDay) {
+        if (toast != null){
+            toast.cancel();
+        }
+        toast = Toast.makeText(this, weatherForDay, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     /**
@@ -115,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
         /* Then, show the error */
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
+
+
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
