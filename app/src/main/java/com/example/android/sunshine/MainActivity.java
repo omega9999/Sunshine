@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     private void invalidateData() {
         mForecastAdapter.setWeatherData(null);
     }
+
     /**
      * This method uses the URI scheme for showing a location found on a
      * map. This super-handy intent is detailed in the "Common Intents"
@@ -296,17 +297,23 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_refresh) {
-            mForecastAdapter.setWeatherData(null);
-            invalidateData();
-            loadWeatherData();
-            return true;
+        switch (id) {
+            case R.id.action_refresh: {
+                mForecastAdapter.setWeatherData(null);
+                invalidateData();
+                loadWeatherData();
+                return true;
+            }
+            case R.id.action_map: {
+                openLocationInMap();
+                return true;
+            }
+            case R.id.action_settings:{
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            }
         }
 
-        if (id == R.id.action_map) {
-            openLocationInMap();
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
