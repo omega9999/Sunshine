@@ -17,6 +17,7 @@ package com.example.android.sunshine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -34,6 +35,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,8 +46,7 @@ import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 import java.net.URL;
 import java.util.Arrays;
 
-
-public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String[]> {
+public class MainActivity extends AppCompatActivity implements ForecastAdapter.ForecastAdapterOnClickHandler, LoaderManager.LoaderCallbacks<String[]>, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -59,10 +60,13 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
     private ProgressBar mLoadingIndicator;
 
+    private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
+
 
         /*
          * Using findViewById, we get a reference to our RecyclerView from xml. This allows us to
@@ -110,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
         /* Once all of our views are setup, we can load the weather data. */
         loadWeatherData();
+
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
 
     }
 
@@ -269,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
      * to automagically open the Common Intents page
      */
     private void openLocationInMap() {
-        String addressString = "1600 Ampitheatre Parkway, CA";
+        final String addressString = SunshinePreferences.getPreferredWeatherLocation(this);
         Uri geoLocation = Uri.parse("geo:0,0?q=" + addressString);
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -281,6 +287,25 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
             Log.d(TAG, "Couldn't call " + geoLocation.toString()
                     + ", no receiving apps installed!");
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (PREFERENCES_HAVE_BEEN_UPDATED) {
+            Log.d(TAG, "onStart: preferences were updated");
+            LoaderManager manager = LoaderManager.getInstance(this);
+            manager.restartLoader(FORECAST_LOADER_ID, null, this);
+            PREFERENCES_HAVE_BEEN_UPDATED = false;
+        }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -317,4 +342,10 @@ public class MainActivity extends AppCompatActivity implements ForecastAdapter.F
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        PREFERENCES_HAVE_BEEN_UPDATED = true;
+    }
+
 }
