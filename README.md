@@ -6,7 +6,7 @@ Rif GIT:
 https://github.com/udacity/ud851-Sunshine
 
 Casi risolti:
-    
+1) Smooth scrolling: mRecyclerView.smoothScrollToPosition(mPosition);
     
 
 TODO:
